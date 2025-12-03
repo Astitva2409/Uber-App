@@ -23,4 +23,5 @@ public class RideRequestDto {
     private RiderDto riderDto;
     private PaymentMethod paymentMethod;
     private RideRequestStatus rideRequestStatus;
+    private Double fare;
 }

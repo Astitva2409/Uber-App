@@ -1,9 +1,11 @@
 package com.project.uber.UberApp.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.locationtech.jts.geom.Point;
 
 @Entity
+@Data
 public class Driver {
 
     @Id

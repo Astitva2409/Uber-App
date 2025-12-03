@@ -1,9 +1,12 @@
 package com.project.uber.UberApp.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.util.List;
 
 @Entity
+@Data
 public class Wallet {
 
     @Id
