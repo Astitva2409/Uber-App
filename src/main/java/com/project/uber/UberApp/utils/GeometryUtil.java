@@ -9,8 +9,24 @@ import org.locationtech.jts.geom.PrecisionModel;
 public class GeometryUtil {
 
     public static Point createPoint(PointDto pointDto) {
+//        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+//        Coordinate coordinate = new Coordinate(pointDto.getCoordinates()[0], pointDto.getCoordinates()[1]);
+//        return geometryFactory.createPoint(coordinate);
+
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        Coordinate coordinate = new Coordinate(pointDto.getCoordinates()[0], pointDto.getCoordinates()[1]);
-        return geometryFactory.createPoint(coordinate);
+
+//        Coordinate coordinate = new Coordinate(
+//                pointDto.getCoordinates()[0],
+//                pointDto.getCoordinates()[1]
+//        );
+//
+//        Point point = geometryFactory.createPoint(coordinate);
+        double lon = pointDto.getCoordinates()[0];
+        double lat = pointDto.getCoordinates()[1];
+
+        Point point = geometryFactory.createPoint(new Coordinate(lon, lat));
+        point.setSRID(4326);
+
+        return point;
     }
 }

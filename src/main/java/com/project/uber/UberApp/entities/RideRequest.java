@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Data
 public class RideRequest {
 
+    private Double fare;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,17 +24,15 @@ public class RideRequest {
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point dropOffLocation;
 
-    @CreationTimestamp
-    private LocalDateTime requestedTime;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Rider rider;
-
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    @CreationTimestamp
+    private LocalDateTime requestedTime;
 
     @Enumerated(EnumType.STRING)
     private RideRequestStatus rideRequestStatus;
 
-    private Double fare;
+    @ManyToOne
+    private Rider rider;
 }

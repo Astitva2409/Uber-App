@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserDto signup(SignupDto signupDto) {
         User user = userRepository.findByEmail(signupDto.getEmail()).orElse(null);
         if(user != null)
@@ -42,7 +44,6 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(mappedUser);
 
         riderService.createNewRider(savedUser);
-
         return modelMapper.map(savedUser, UserDto.class);
     }
 

@@ -62,10 +62,8 @@
 
 		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-spatial -->
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
-			<version>7.1.10.Final</version>
-			<type>pom</type>
 		</dependency>
 
 		<dependency>
