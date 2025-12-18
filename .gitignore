@@ -34,4 +34,4 @@ build/
 application.properties
 target/
 .idea/
-data.sql
+src/main/resources/data.sql
