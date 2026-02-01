@@ -4,29 +4,27 @@ import com.project.uber.UberApp.dto.DriverDto;
 import com.project.uber.UberApp.dto.RideDto;
 import com.project.uber.UberApp.dto.RideRequestDto;
 import com.project.uber.UberApp.dto.RiderDto;
+import com.project.uber.UberApp.entities.Ride;
 import com.project.uber.UberApp.entities.RideRequest;
 import com.project.uber.UberApp.entities.Rider;
 import com.project.uber.UberApp.entities.User;
 import com.project.uber.UberApp.entities.enums.RideRequestStatus;
+import com.project.uber.UberApp.entities.enums.RideStatus;
 import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.repository.RideRequestRepository;
 import com.project.uber.UberApp.repository.RiderRepository;
+import com.project.uber.UberApp.services.DriverService;
+import com.project.uber.UberApp.services.RideService;
 import com.project.uber.UberApp.services.RiderService;
-import com.project.uber.UberApp.strategies.DriverMatchingStrategy;
-import com.project.uber.UberApp.strategies.RideFareCalculationStrategy;
-import com.project.uber.UberApp.strategies.StrategyManager;
-import com.project.uber.UberApp.utils.GeometryUtil;
+import com.project.uber.UberApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.io.WKTWriter;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import static com.project.uber.UberApp.entities.enums.RideRequestStatus.PENDING;
 
 @Service
 @RequiredArgsConstructor
@@ -34,9 +32,11 @@ import static com.project.uber.UberApp.entities.enums.RideRequestStatus.PENDING;
 public class RiderServiceImpl implements RiderService {
 
     private final ModelMapper modelMapper;
-    private final StrategyManager strategyManager;
+    private final RideStrategyManager strategyManager;
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
+    private final RideService rideService;
+    private final DriverService driverService;
 
     @Override
     @Transactional
@@ -56,8 +56,23 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    @Transactional
     public RideDto cancelRide(Long rideId) {
-        return null;
+        Rider rider = getCurrentRider();
+        Ride ride = rideService.getRideById(rideId);
+
+        if (!rider.getId().equals(ride.getRider().getId())) {
+            throw new RuntimeException("This rider cannot cancel another rider's ride");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+            throw new RuntimeException("Cannot cancel ongoing ride");
+        }
+
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        driverService.updateDriverAvailability(ride.getDriver(), true);
+
+        return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
@@ -67,12 +82,16 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public RiderDto getMyProfile() {
-        return null;
+        Rider rider = getCurrentRider();
+        return modelMapper.map(rider, RiderDto.class);
     }
 
     @Override
-    public List<RideDto> getAllRides() {
-        return List.of();
+    public List<RideDto> getAllRides(PageRequest pageRequest) {
+        Rider rider = getCurrentRider();
+        return rideService.getAllRidesOfRider(rider, pageRequest)
+                .map(ride -> modelMapper.map(ride, RideDto.class))
+                .getContent();
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.time.LocalTime;
 
 @Component
 @RequiredArgsConstructor
-public class StrategyManager {
+public class RideStrategyManager {
 
     private final DriverMatchingHighestRatedStrategy driverMatchingHighestRatedStrategy;
     private final DriverMatchingNearestDriverStrategy driverMatchingNearestDriverStrategy;

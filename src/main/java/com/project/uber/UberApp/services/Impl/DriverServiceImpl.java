@@ -2,7 +2,6 @@ package com.project.uber.UberApp.services.Impl;
 
 import com.project.uber.UberApp.dto.DriverDto;
 import com.project.uber.UberApp.dto.RideDto;
-import com.project.uber.UberApp.dto.RideStartDto;
 import com.project.uber.UberApp.dto.RiderDto;
 import com.project.uber.UberApp.entities.Driver;
 import com.project.uber.UberApp.entities.Ride;
@@ -11,16 +10,16 @@ import com.project.uber.UberApp.entities.enums.RideRequestStatus;
 import com.project.uber.UberApp.entities.enums.RideStatus;
 import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.repository.DriverRepository;
-import com.project.uber.UberApp.services.DistanceService;
 import com.project.uber.UberApp.services.DriverService;
+import com.project.uber.UberApp.services.PaymentService;
 import com.project.uber.UberApp.services.RideRequestService;
 import com.project.uber.UberApp.services.RideService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +31,7 @@ public class DriverServiceImpl implements DriverService {
     private final DriverRepository driverRepository;
     private final RideService rideService;
     private final ModelMapper modelMapper;
+    private final PaymentService paymentService;
 
     @Override
     @Transactional
@@ -54,11 +54,27 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional
     public RideDto cancelRide(Long rideId) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if (!driver.getId().equals(ride.getDriver().getId())) {
+            throw new RuntimeException("This driver has not started this ride");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
+            throw new RuntimeException("Cannot cancel ongoing ride");
+        }
+
+        rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        updateDriverAvailability(driver, true);
+
+        return modelMapper.map(ride, RideDto.class);
     }
 
     @Override
+    @Transactional
     public RideDto startRide(Long rideId, String otp) {
          Ride ride = rideService.getRideById(rideId);
          Driver driver = getCurrentDriver();
@@ -77,12 +93,32 @@ public class DriverServiceImpl implements DriverService {
 
         ride.setStartedAt(LocalDateTime.now());
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
+
+        paymentService.createNewPayment(savedRide);
+
         return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
+    @Transactional
     public RideDto endRide(Long rideId) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if (!driver.getId().equals(ride.getDriver().getId())) {
+            throw new RuntimeException("This driver has not started this ride");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.ONGOING)) {
+            throw new RuntimeException("Ride status is not ONGOING hence cannot be ended");
+        }
+
+        ride.setEndedAt(LocalDateTime.now());
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ENDED);
+        updateDriverAvailability(driver, true);
+
+        paymentService.processPayment(ride);
+        return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
@@ -92,12 +128,17 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverDto getMyProfile() {
-        return null;
+        Driver driver = getCurrentDriver();
+        return modelMapper.map(driver, DriverDto.class);
     }
 
     @Override
-    public List<RideDto> getAllRides() {
-        return List.of();
+    @Transactional
+    public List<RideDto> getAllRides(PageRequest pageRequest) {
+        Driver driver = getCurrentDriver();
+        return rideService.getAllRidesOfDriver(driver, pageRequest)
+                .map(ride -> modelMapper.map(ride, RideDto.class))
+                .getContent();
     }
 
     @Override

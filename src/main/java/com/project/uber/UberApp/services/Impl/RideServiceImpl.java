@@ -1,26 +1,22 @@
 package com.project.uber.UberApp.services.Impl;
 
-import com.project.uber.UberApp.dto.DriverDto;
-import com.project.uber.UberApp.dto.RideDto;
 import com.project.uber.UberApp.dto.RideRequestDto;
-import com.project.uber.UberApp.dto.RiderDto;
 import com.project.uber.UberApp.entities.Driver;
 import com.project.uber.UberApp.entities.Ride;
 import com.project.uber.UberApp.entities.RideRequest;
+import com.project.uber.UberApp.entities.Rider;
 import com.project.uber.UberApp.entities.enums.RideRequestStatus;
 import com.project.uber.UberApp.entities.enums.RideStatus;
 import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.repository.RideRepository;
 import com.project.uber.UberApp.services.RideRequestService;
 import com.project.uber.UberApp.services.RideService;
-import com.project.uber.UberApp.services.RiderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
 
 @Service
@@ -69,12 +65,12 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepository.findByRider(rider, pageRequest);
     }
 
     @Override
-    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepository.findByDriver(driver, pageRequest);
     }
 }
