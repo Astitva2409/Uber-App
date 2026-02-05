@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Table(indexes = {
+        @Index(name = "idx_ride_rider", columnList = "rider_id"),
+        @Index(name = "idx_ride_driver", columnList = "driver_id"),
+        @Index(name = "idx_ride_status", columnList = "rideStatus")
+})
 public class Ride {
 
     @Id

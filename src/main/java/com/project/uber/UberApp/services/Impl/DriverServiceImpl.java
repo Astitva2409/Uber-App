@@ -10,12 +10,10 @@ import com.project.uber.UberApp.entities.enums.RideRequestStatus;
 import com.project.uber.UberApp.entities.enums.RideStatus;
 import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.repository.DriverRepository;
-import com.project.uber.UberApp.services.DriverService;
-import com.project.uber.UberApp.services.PaymentService;
-import com.project.uber.UberApp.services.RideRequestService;
-import com.project.uber.UberApp.services.RideService;
+import com.project.uber.UberApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +30,12 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
+
+    @Override
+    public Driver createNewDriver(Driver driver) {
+        return driverRepository.save(driver);
+    }
 
     @Override
     @Transactional
@@ -96,6 +100,8 @@ public class DriverServiceImpl implements DriverService {
 
         paymentService.createNewPayment(savedRide);
 
+        ratingService.cresateNewRating(savedRide);
+
         return modelMapper.map(savedRide, RideDto.class);
     }
 
@@ -123,7 +129,18 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public RiderDto rateRider(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if (!driver.getId().equals(ride.getDriver().getId())) {
+            throw new RuntimeException("This driver cannot rate the rider");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride is still not ended. Rating can be done after the ride ahs ended");
+        }
+
+        return ratingService.rateRider(ride, rating);
     }
 
     @Override
@@ -134,11 +151,10 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public List<RideDto> getAllRides(PageRequest pageRequest) {
+    public Page<RideDto> getAllRides(PageRequest pageRequest) {
         Driver driver = getCurrentDriver();
         return rideService.getAllRidesOfDriver(driver, pageRequest)
-                .map(ride -> modelMapper.map(ride, RideDto.class))
-                .getContent();
+                .map(ride -> modelMapper.map(ride, RideDto.class));
     }
 
     @Override

@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(name = "idx_payment_method", columnList = "paymentMethod"),
+        @Index(name = "idx_payment_status", columnList = "paymentStatus")
+})
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

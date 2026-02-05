@@ -4,22 +4,21 @@ import com.project.uber.UberApp.dto.DriverDto;
 import com.project.uber.UberApp.dto.RideDto;
 import com.project.uber.UberApp.dto.RideRequestDto;
 import com.project.uber.UberApp.dto.RiderDto;
-import com.project.uber.UberApp.entities.Ride;
-import com.project.uber.UberApp.entities.RideRequest;
-import com.project.uber.UberApp.entities.Rider;
-import com.project.uber.UberApp.entities.User;
+import com.project.uber.UberApp.entities.*;
 import com.project.uber.UberApp.entities.enums.RideRequestStatus;
 import com.project.uber.UberApp.entities.enums.RideStatus;
 import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.repository.RideRequestRepository;
 import com.project.uber.UberApp.repository.RiderRepository;
 import com.project.uber.UberApp.services.DriverService;
+import com.project.uber.UberApp.services.RatingService;
 import com.project.uber.UberApp.services.RideService;
 import com.project.uber.UberApp.services.RiderService;
 import com.project.uber.UberApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +36,7 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
     private final RideService rideService;
     private final DriverService driverService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional
@@ -77,7 +77,18 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public DriverDto rateDriver(Long rideId, Integer rating) {
-        return null;
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+
+        if (!rider.getId().equals(ride.getRider().getId())) {
+            throw new RuntimeException("This rider cannot rate the driver");
+        }
+
+        if (!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride is still not ended. Rating can be done after the ride ahs ended");
+        }
+
+        return ratingService.rateDriver(ride, rating);
     }
 
     @Override
@@ -87,11 +98,10 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
-    public List<RideDto> getAllRides(PageRequest pageRequest) {
+    public Page<RideDto> getAllRides(PageRequest pageRequest) {
         Rider rider = getCurrentRider();
         return rideService.getAllRidesOfRider(rider, pageRequest)
-                .map(ride -> modelMapper.map(ride, RideDto.class))
-                .getContent();
+                .map(ride -> modelMapper.map(ride, RideDto.class));
     }
 
     @Override

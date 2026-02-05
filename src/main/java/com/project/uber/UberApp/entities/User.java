@@ -8,7 +8,10 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = "app_user")
+@Table(name = "app_user", indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_name", columnList = "name")
+})
 public class User {
 
     @Id
