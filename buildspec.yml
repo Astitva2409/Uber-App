@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+  pre_build:
+    commands:
+      - echo "Checking Java and Maven versions..."
+      - java -version
+      - mvn -version
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Compiling and packaging the Spring Boot application..."
+      # Skipping tests initially to ensure the build pipeline connects successfully
+      - mvn clean package -DskipTests
+  post_build:
+    commands:
+      - echo "Build completed successfully on `date`"
+
+artifacts:
+  files:
+    - target/*.jar
+  discard-paths: yes
