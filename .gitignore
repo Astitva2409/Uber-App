@@ -32,7 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 application.properties
-application-prod.properties
 application-dev.properties
 target/
 .idea/
