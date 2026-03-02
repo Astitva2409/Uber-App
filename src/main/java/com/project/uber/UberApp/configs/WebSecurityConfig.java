@@ -27,6 +27,7 @@ public class WebSecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/",
+            "/error",
             "/actuator/**"
     };
 

@@ -21,7 +21,9 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         List<String> allowedRoutes = List.of("/v3/api-docs", "/actuator");
-        boolean isAllowed = allowedRoutes
+        // Added safety check to prevent NullPointerExceptions from AWS ELB pings
+        String path = request.getURI().getPath();
+        boolean isAllowed = path != null && allowedRoutes
                 .stream()
                 .anyMatch(route -> request.getURI().getPath().contains(route));
 
