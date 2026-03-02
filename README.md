@@ -1,4 +1,4 @@
-# Uber Clone Backend API 🚖
+# Uber Backend 🚖
 
 A robust, scalable, and fully featured backend REST API for a ride-hailing application like Uber. Built with **Spring Boot** and **PostgreSQL (PostGIS)**, this project handles the entire ride lifecycle, complex spatial queries for driver matching, dynamic pricing, wallet transactions, and secure JWT-based authentication.
 
