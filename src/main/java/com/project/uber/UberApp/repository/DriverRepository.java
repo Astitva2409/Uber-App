@@ -15,21 +15,18 @@ import java.util.Optional;
 @Repository
 public interface DriverRepository extends JpaRepository<Driver, Long> {
 
-@Query(value = """
-        SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance
-        FROM driver d
-        WHERE d.available = true
-          AND ST_DWithin(d.current_location, :pickupLocation, 10000)
-        ORDER BY ST_Distance(d.current_location, :pickupLocation)
-        LIMIT 10""", nativeQuery = true)
+    @Query(value = "SELECT d.*, ST_Distance(cast(d.current_location as geography), cast(?1 as geography)) AS distance " +
+            "FROM driver d " +
+            "WHERE d.available = true AND ST_DWithin(cast(d.current_location as geography), cast(?1 as geography), 10000) " +
+            "ORDER BY distance " +
+            "LIMIT 10", nativeQuery = true)
     List<Driver> findTenNearestDrivers(Point pickupLocation);
 
-    @Query(value = """
-            SELECT d.*
-            FROM driver d
-            WHERE d.available = true AND ST_DWithin(d.current_location, :pickupLocation, 15000)
-            ORDER BY d.rating DESC
-            LIMIT 10""", nativeQuery = true)
+    @Query(value = "SELECT d.*, ST_Distance(cast(d.current_location as geography), cast(?1 as geography)) AS distance " +
+            "FROM driver d " +
+            "WHERE d.available = true AND ST_DWithin(cast(d.current_location as geography), cast(?1 as geography), 10000) " +
+            "ORDER BY d.rating DESC, distance ASC " +
+            "LIMIT 10", nativeQuery = true)
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
     Optional<Driver> findByUser(User user);

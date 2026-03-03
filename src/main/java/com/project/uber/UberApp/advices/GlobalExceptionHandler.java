@@ -74,8 +74,25 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<ApiResponse<?>> handleInputValidationError(MethodArgumentNotValidException exception) {
+//        List<String> errors = exception
+//                .getBindingResult()
+//                .getAllErrors()
+//                .stream()
+//                .map(error -> error.getDefaultMessage())
+//                .collect(Collectors.toList());
+//
+//        ApiError apiError = ApiError.builder()
+//                .status(HttpStatus.BAD_REQUEST)
+//                .message("Input validation failed")
+//                .errorMessage(errors)
+//                .build();
+//        return buildResponseEntity(apiError);
+//    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<?>> handleInputValidationError(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse<?>> handleInputValidationErrors(MethodArgumentNotValidException exception) {
         List<String> errors = exception
                 .getBindingResult()
                 .getAllErrors()
@@ -88,6 +105,7 @@ public class GlobalExceptionHandler {
                 .message("Input validation failed")
                 .errorMessage(errors)
                 .build();
+
         return buildResponseEntity(apiError);
     }
 }

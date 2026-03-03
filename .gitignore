@@ -1,10 +1,32 @@
-HELP.md
+# Maven - Ignore the build output
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
+# Log files
+*.log
+
+# Compiled class files
+*.class
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# IDE - VS Code
+.vscode/
+
+# IDE - STS/Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -13,26 +35,11 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# OS Files
+.DS_Store
+Thumbs.db
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
+# SENSITIVE DATA - Keep these local
 application.properties
-application-dev.properties
-target/
-.idea/
+# (Only keep data.sql ignored if it contains real passwords/private info)
 src/main/resources/data.sql

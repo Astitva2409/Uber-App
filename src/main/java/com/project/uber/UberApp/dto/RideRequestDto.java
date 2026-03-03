@@ -1,23 +1,17 @@
 package com.project.uber.UberApp.dto;
 
-import com.project.uber.UberApp.entities.enums.PaymentMethod;
-import com.project.uber.UberApp.entities.enums.RideRequestStatus;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RideRequestDto {
-    private Long id;
-    private PointDto pickupLocation;
+
+    @Valid
+    @NotNull(message = "Pickup location is required")
+    private PointDto pickUpLocation;
+
+    @Valid
+    @NotNull(message = "Drop-off location is required")
     private PointDto dropOffLocation;
-    private LocalDateTime requestedTime;
-    private RiderDto rider;
-    private PaymentMethod paymentMethod;
-    private RideRequestStatus rideRequestStatus;
-    private Double fare;
 }

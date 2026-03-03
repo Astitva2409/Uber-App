@@ -10,10 +10,7 @@ import com.project.uber.UberApp.exception.ResourceNotFoundException;
 import com.project.uber.UberApp.exception.RuntimeConflictException;
 import com.project.uber.UberApp.repository.UserRepository;
 import com.project.uber.UberApp.security.JwtService;
-import com.project.uber.UberApp.services.AuthService;
-import com.project.uber.UberApp.services.DriverService;
-import com.project.uber.UberApp.services.RiderService;
-import com.project.uber.UberApp.services.WalletService;
+import com.project.uber.UberApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final DriverService driverService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final EmailSenderService emailSenderService;
 
     @Override
     public String[] login(String email, String password) {
@@ -67,6 +65,15 @@ public class AuthServiceImpl implements AuthService {
         mappedUser.setRoles(Set.of(Role.RIDER));
         mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
         User savedUser = userRepository.save(mappedUser);
+
+        // Trigger the Welcome Email
+        String emailBody = "Hi " + savedUser.getName() + ",\n\n" +
+                "Welcome to the Uber App! We are thrilled to have you on board.\n\n" +
+                "Best Regards,\n" +
+                "The Uber App Team";
+
+        // We use a separate thread/asynchronous approach in production, but calling it directly is fine for now
+        emailSenderService.sendEmail(savedUser.getEmail(), "Welcome to Uber App!", emailBody);
 
         riderService.createNewRider(savedUser);
         walletService.createNewWallet(savedUser);

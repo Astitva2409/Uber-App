@@ -2,6 +2,7 @@ package com.project.uber.UberApp.controllers;
 
 import com.project.uber.UberApp.dto.*;
 import com.project.uber.UberApp.services.DriverService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +25,7 @@ public class DriverController {
 
     @PostMapping("/startRide/{rideRequestId}")
     public ResponseEntity<RideDto> startRide(@PathVariable Long rideRequestId,
-                                             @RequestBody RideStartDto rideStartDto) {
+                                             @RequestBody @Valid RideStartDto rideStartDto) {
         return ResponseEntity.ok(driverService.startRide(rideRequestId, rideStartDto.getOtp()));
     }
 
@@ -39,7 +40,7 @@ public class DriverController {
     }
 
     @PostMapping("/rateRider")
-    public ResponseEntity<RiderDto> rateRider(@RequestBody RatingDto ratingDto) {
+    public ResponseEntity<RiderDto> rateRider(@RequestBody @Valid RatingDto ratingDto) {
         return ResponseEntity.ok(driverService.rateRider(ratingDto.getRideId(), ratingDto.getRating()));
     }
 
